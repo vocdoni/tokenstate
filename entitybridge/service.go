@@ -3,6 +3,7 @@ package entitybridge
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -53,7 +54,7 @@ func (bs *EntityBridgeService) CreateEntityMetadata() (string, error) {
 		"method":  "addFile",
 		"type":    "ipfs",
 		"name":    "entity-metadata.json",
-		"content": td.String(),
+		"content": base64.StdEncoding.EncodeToString([]byte(td.String())),
 	})
 	if err != nil {
 		return "", err
@@ -78,7 +79,7 @@ func (bs *EntityBridgeService) CreateEntityMetadata() (string, error) {
 	if metaResp.URI == "" {
 		return "", fmt.Errorf("response URI cannot be empty")
 	}
-	log.Debugf("gw response: %+v", metaResp)
+	log.Debugf("gw response body: %+v", metaResp)
 	log.Infof("upload file uri: %s", metaResp.URI)
 
 	// eid == token address
