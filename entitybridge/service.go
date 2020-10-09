@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -59,6 +60,7 @@ func (bs *EntityBridgeService) CreateEntityMetadata() (string, error) {
 	}
 
 	// upload entity data to IPFS via gateway
+	log.Debug("sending gw request")
 	resp, err := http.Post(bs.Gateway,
 		"application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
@@ -73,6 +75,10 @@ func (bs *EntityBridgeService) CreateEntityMetadata() (string, error) {
 	if err := json.Unmarshal(body, &metaResp); err != nil {
 		return "", nil
 	}
+	if metaResp.URI == "" {
+		return "", fmt.Errorf("response URI cannot be empty")
+	}
+	log.Debugf("gw response: %+v", metaResp)
 	log.Infof("upload file uri: %s", metaResp.URI)
 
 	// eid == token address

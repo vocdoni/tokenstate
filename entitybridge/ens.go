@@ -2,6 +2,7 @@ package entitybridge
 
 import (
 	"context"
+	"errors"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -86,7 +87,16 @@ func (e *ENS) SetText(signKey *ethereum.SignKeys, node [32]byte, key, value stri
 		return err
 	}
 	log.Infof("tx sent: %s", tx.Hash().Hex())
-	return nil
+	// check text added successfully
+	res, err := e.GetText(node, key)
+	if err != nil {
+		return err
+	}
+	if res != "" {
+		log.Debugf("added text: %s", res)
+		return nil
+	}
+	return errors.New("text was not set, tx failed")
 }
 
 func (e *ENS) GetText(node [32]byte, key string) (string, error) {
